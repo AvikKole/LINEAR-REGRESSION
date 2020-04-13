@@ -1,0 +1,45 @@
+%%y=0.1091*x+48.64%%BASIC FITTING
+%%r^2=0.6507
+
+
+
+%20%
+%%DATASET PARTIONING
+
+
+Ptest = hvwml1(cv.test,:);
+x=zeros(40,1);
+for i=1:40
+x(i,1)=Ptrain.Weight(i);
+end
+y=zeros(40,1);
+for i=1:40
+y(i,1)=Ptrain.Height(i);
+end
+n=length(Ptrain.Weight);
+xavg=sum(x)/n;
+yavg=sum(y)/n;
+xerror=(x-xavg);
+yerror=(y-yavg);
+XSE=xerror.^2;
+YSE=yerror.^2;
+Sx=sqrt(sum(XSE)/(n-1));%% Standard Deviation of X
+Sy=sqrt(sum(YSE)/(n-1));%% Standard Deviation of Y
+r=sum((xerror).*(yerror))/sqrt(sum(XSE)*sum(YSE));%%PEARSON'S CARDISIAN CO-EFFICIENT
+b=r*((Sy)/(Sx));%%SLOPE OF LINE
+a=yavg-b*xavg;%%Y-INTERCEPT OF LINE
+Result=zeros(9,1);
+for i=1:9
+Result(i,1)=a+b*x(i,1);%%ERROR CALCULATION
+end
+for i=1:9
+SE1=sum(Ptest.Height(i,1)-Result(i,1)).^2;%%SQUARED PREDICTED ERROR
+end
+RMSE=sqrt(SE1)/n;%%ROOT MEAN SQUARE ERROR
+Perrors=zeros(9,1);
+Perrors=abs(Ptest.Height-Result);%% Prediction error
+P_ERR_BY_P_HT=zeros(9,1);
+for i=1:9
+P_ERR_BY_P_HT(i,1)=(Perror(i,1)/Ptest.Height(i,1));
+end
+percentage=sum(P_ERR_BY_P_HT)/9*100;%%percentage=(sum(Perror./Ptest.Height)/n)*100;%%Mean Absolute Percentage error
